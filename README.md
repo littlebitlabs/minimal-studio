@@ -31,6 +31,24 @@ curl -fsSL --proto '=https' --proto-redir '=https' \
   https://artifacts.littlebitlabs.com/api/packages/littlebitlabs/generic/minimal-studio/latest/install-mac.sh | sh
 ```
 
+### Verify a download
+
+`SHA256SUMS.txt` lists the SHA-256 of every file in a release, and `SHA256SUMS.txt.asc` is its GPG signature, made with the Littlebit Labs releases key ([`littlebit-labs-releases.asc`](littlebit-labs-releases.asc)). The key's fingerprint:
+
+```text
+879C 474D DA68 F63F AFE3  4D39 8683 CD6A C10E 1012
+```
+
+Put `SHA256SUMS.txt`, `SHA256SUMS.txt.asc` and the file you downloaded in one folder, then run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlebitlabs/minimal-studio/main/littlebit-labs-releases.asc | gpg --import
+gpg --verify SHA256SUMS.txt.asc SHA256SUMS.txt   # must say "Good signature" and show the fingerprint above
+sha256sum -c --ignore-missing SHA256SUMS.txt     # on a Mac: shasum -a 256 -c --ignore-missing SHA256SUMS.txt
+```
+
+`gpg` also warns that the key is "not certified with a trusted signature". That is normal for a key you have not signed yourself: compare the fingerprint it shows. If it differs, or a check says FAILED, do not open the file and [report it](SECURITY.md). v0.190.0 and v0.191.0 were published without `SHA256SUMS.txt.asc`; for those only the checksum can be checked.
+
 ## Read the Book of Minimal Studio
 
 [`book/`](book/) holds the full, screenshot-by-screenshot guide this skill is distilled from — 35 chapters and appendices, run against a real Core on Minimal Studio v0.189.0.

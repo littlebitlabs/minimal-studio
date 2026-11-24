@@ -25,3 +25,4 @@ This repository holds ONE source, [`minimal-studio-SKILL.md`](minimal-studio-SKI
 - Commit messages follow `<type>(<scope>): <summary>`, for example `chore(skill): verify against Studio 0.190.0`.
 - Published versions are immutable. A wrong claim is fixed in a new version, never by rewriting a tag.
 - The `REPO` and `BRANCH` environment variables of the render script set the download links in `agent-skills/README.md`; the defaults are `littlebitlabs/minimal-studio` and `main`.
+- The releases key in `littlebit-labs-releases.asc` expires on 2028-11-10. Before then extend it (the fingerprint stays) or issue a new one, and re-export the file with `gpg --armor --export <fingerprint>`; a new key also changes the fingerprint in the README.
