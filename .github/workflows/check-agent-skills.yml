@@ -1,0 +1,14 @@
+name: check agent-skills
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  render-matches-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: agent-skills/ must be what the source renders to
+        run: scripts/render-agent-skills.sh --check
+      - name: the checksums must match the files
+        run: cd agent-skills && sha256sum -c SHA256SUMS

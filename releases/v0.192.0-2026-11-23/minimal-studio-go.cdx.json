@@ -1,0 +1,319 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:9c1b61e0-ebbc-46cd-b2b9-add9ced327ef",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-11-23T16:16:39+05:30",
+    "tools": [
+      {
+        "vendor": "CycloneDX",
+        "name": "cyclonedx-gomod",
+        "version": "v1.12.0",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "c04c2e07205d6477095f3fa9fd63d964"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "fb43f0e7beed4f27af63c5e24787fed5168290fd"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "f92e308aa450d33fb6f4c301e2dcd194b7c889f6ff0874388907412d75d539c6"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "39a2c71167c6eb7b4c5ad75ade8f82973a23f63f59c26d03706768e3efe7f83bade5534073304c0e9cb4de3be2cf5e94"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "d88ff735248942311b886b596abcd3dfa441f59b3f42c6444fd1bbf7c11c38762942e6a461b99afb663d1c3d6249bc1b73a193090fb36662b28666ac8951fc7b"
+          }
+        ],
+        "externalReferences": [
+          {
+            "url": "https://github.com/CycloneDX/cyclonedx-gomod",
+            "type": "vcs"
+          },
+          {
+            "url": "https://cyclonedx.org",
+            "type": "website"
+          }
+        ]
+      }
+    ],
+    "component": {
+      "bom-ref": "pkg:golang/minimal-studio@v0.192.0-2026-11-23?type=module",
+      "type": "application",
+      "name": "minimal-studio",
+      "version": "v0.192.0-2026-11-23",
+      "purl": "pkg:golang/minimal-studio@v0.192.0-2026-11-23?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "properties": [
+        {
+          "name": "cdx:gomod:build:env:CGO_ENABLED",
+          "value": "1"
+        },
+        {
+          "name": "cdx:gomod:build:env:GOARCH",
+          "value": "arm64"
+        },
+        {
+          "name": "cdx:gomod:build:env:GOOS",
+          "value": "darwin"
+        },
+        {
+          "name": "cdx:gomod:build:env:GOVERSION",
+          "value": "go1.26.11"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:golang/github.com/leaanthony/go-ansi-parser@v1.6.1?type=module",
+      "type": "library",
+      "name": "github.com/leaanthony/go-ansi-parser",
+      "version": "v1.6.1",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c5df1bcc044addd12baa43c5b6817d177fc780df14424d1e7756032a9133d350"
+        }
+      ],
+      "purl": "pkg:golang/github.com/leaanthony/go-ansi-parser@v1.6.1?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "externalReferences": [
+        {
+          "url": "https://github.com/leaanthony/go-ansi-parser",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/leaanthony/slicer@v1.6.0?type=module",
+      "type": "library",
+      "name": "github.com/leaanthony/slicer",
+      "version": "v1.6.0",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d5114fe6e88f26f4fddd30078be8a97773400a86e45b9df252206a661784fc9b"
+        }
+      ],
+      "purl": "pkg:golang/github.com/leaanthony/slicer@v1.6.0?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "externalReferences": [
+        {
+          "url": "https://github.com/leaanthony/slicer",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/leaanthony/u@v1.1.1?type=module",
+      "type": "library",
+      "name": "github.com/leaanthony/u",
+      "version": "v1.1.1",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4d4163c031a5357f96bb0544cc3a90c02da53afd0fe2e853430ec23057622bb3"
+        }
+      ],
+      "purl": "pkg:golang/github.com/leaanthony/u@v1.1.1?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "externalReferences": [
+        {
+          "url": "https://github.com/leaanthony/u",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/pkg/errors@v0.9.1?type=module",
+      "type": "library",
+      "name": "github.com/pkg/errors",
+      "version": "v0.9.1",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "14404bc75cd2db5e28c298f2eeab017a2c5b51192e850030acae54c0b193c2de"
+        }
+      ],
+      "purl": "pkg:golang/github.com/pkg/errors@v0.9.1?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "externalReferences": [
+        {
+          "url": "https://github.com/pkg/errors",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "BSD-2-Clause"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/rivo/uniseg@v0.4.7?type=module",
+      "type": "library",
+      "name": "github.com/rivo/uniseg",
+      "version": "v0.4.7",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "59476f916f2e121ad87cb0b8673769236cedc4fd48e7cdbee3d39ce4cabae154"
+        }
+      ],
+      "purl": "pkg:golang/github.com/rivo/uniseg@v0.4.7?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "externalReferences": [
+        {
+          "url": "https://github.com/rivo/uniseg",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/wailsapp/wails/v2@v2.11.0?type=module",
+      "type": "library",
+      "name": "github.com/wailsapp/wails/v2",
+      "version": "v2.11.0",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b1e2da715f29aaea6adf62234b863b57cb9c69bd16670b4ae95bd4571481b6a4"
+        }
+      ],
+      "purl": "pkg:golang/github.com/wailsapp/wails/v2@v2.11.0?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "externalReferences": [
+        {
+          "url": "https://github.com/wailsapp/wails",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/zalando/go-keyring@v0.2.8?type=module",
+      "type": "library",
+      "name": "github.com/zalando/go-keyring",
+      "version": "v0.2.8",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "eac0ff51ca65ee336ad74accda982a4ecd2c67d577a8caea7c8232e583dc707b"
+        }
+      ],
+      "purl": "pkg:golang/github.com/zalando/go-keyring@v0.2.8?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "externalReferences": [
+        {
+          "url": "https://github.com/zalando/go-keyring",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:golang/minimal-studio@v0.192.0-2026-11-23?type=module",
+      "dependsOn": [
+        "pkg:golang/github.com/wailsapp/wails/v2@v2.11.0?type=module",
+        "pkg:golang/github.com/zalando/go-keyring@v0.2.8?type=module"
+      ]
+    },
+    {
+      "ref": "pkg:golang/github.com/leaanthony/go-ansi-parser@v1.6.1?type=module",
+      "dependsOn": [
+        "pkg:golang/github.com/rivo/uniseg@v0.4.7?type=module"
+      ]
+    },
+    {
+      "ref": "pkg:golang/github.com/leaanthony/slicer@v1.6.0?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/leaanthony/u@v1.1.1?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/pkg/errors@v0.9.1?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/rivo/uniseg@v0.4.7?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/wailsapp/wails/v2@v2.11.0?type=module",
+      "dependsOn": [
+        "pkg:golang/github.com/leaanthony/go-ansi-parser@v1.6.1?type=module",
+        "pkg:golang/github.com/leaanthony/slicer@v1.6.0?type=module",
+        "pkg:golang/github.com/leaanthony/u@v1.1.1?type=module",
+        "pkg:golang/github.com/pkg/errors@v0.9.1?type=module",
+        "pkg:golang/github.com/rivo/uniseg@v0.4.7?type=module"
+      ]
+    },
+    {
+      "ref": "pkg:golang/github.com/zalando/go-keyring@v0.2.8?type=module"
+    }
+  ]
+}

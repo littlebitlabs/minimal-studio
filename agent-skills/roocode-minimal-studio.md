@@ -1,0 +1,173 @@
+---
+description: Use Minimal Studio, the desktop and web client of a Minimal Core, to sign in, explore and call tables through the Auto API, build and debug Custom APIs (SQL, Lua, Starlark and Expr steps) and Code Modules, mint access tokens, set table locks, permission templates and row scope, add databases, and promote between dev, staging and prod. Use when asked to do, explain or fix anything in Minimal Studio or on the Minimal Core it connects to.
+---
+<!-- generated from minimal-studio-SKILL.md v0.1.0 by scripts/render-agent-skills.sh — do not edit by hand -->
+
+# Minimal Studio — agent skill
+
+<!-- AMEND ONLY: change this file, then run scripts/render-agent-skills.sh (see MAINTAINING.md). Every rule was run in Minimal Studio v0.189.0 or comes from Littlebit Labs' published documentation (Book of Minimal, Pitstop guides, the Core's tool descriptions); the rest is marked "unverified". -->
+
+You are helping a person use **Minimal Studio**, the screens of a Minimal Core. The Core is a server with no pages of its own: it holds organizations, projects and spaces, serves each table of a registered database as a governed REST API and as MCP tools, decides who may do what on every call, and records every call. Studio is a desktop app (verified on the Mac: a zip, `…-mac-arm64.zip` or `…-mac-amd64.zip`, from the page your administrator publishes) and a web build. It keeps only the Core's address, the workspace choice, the sign-in, its settings and the server key; the Core keeps the data.
+
+Verified on Studio v0.189.0 against a local Core ("Minimal v2"). Not run: Windows and Linux builds, a release web build, and the items under "Not verified". Studio's own words are in **bold** (screen labels) and "quotes" (messages).
+
+## Inputs to collect before you act (stop and ask if one is missing)
+
+1. **The Core's address**: for example `http://api.localhost` (a local Pitstop install; it resolves only on the machine running Docker) or `https://api.<name>`; a Core listens on 3045 by default.
+2. **How the person signs in**: **Direct to Core** with a **server key** ("The usual choice"), or **Gateway** (a login page in front of the Core, as on Pitstop installs). The person types the key in Studio, or logs in on the gateway's own page in their browser; you never see either.
+3. **Who they sign in as**: the **User ID** under **Identity options**. With a server key, any ID that does not start with `sys:` gets full admin inside organizations; `sys:…` is a provisioner (creates organizations and grants schema and database roles, nothing inside them); `mcp:…` is the only owner the MCP door accepts.
+4. **The workspace**: organization (its ID is asked once at sign-in), project, **space** (`dev` unless told), feature.
+5. **The task, and what you may change.** Default: read-only everywhere. A space fences only definitions, modules, tokens and the MCP switch. Rows, databases and indexing belong to the project and are the same in every space; treat locks, templates, hiding, row scope and Schema Changes the same way. Ask before any of them, whichever space is picked.
+
+NEVER ask for, print, store or paste: a server key, a password, a verification code or authenticator secret, a developer token, an access token, an AI provider key. The person enters them in Studio; the **consent** tick of the web build ("I agree to the Terms of Service, Privacy Policy and Consent Notice.") is theirs too.
+
+## Discipline (non-negotiable)
+
+- Secrets: see above. Never put one on a command line or in a report.
+- `dev` first for definitions and modules (a space is not a copy of the data). ASK before: any delete (definition, module, token, template, organization), a write that changes rows, opening a write lock or MCP/M2M reads, **Save roles**, **Edit connections**, **Schema Changes**, **Index all tables**, a drop, a promotion to any space but `dev`, switching anything on for agents. Never drop a database or run SQL on a live one without the person's explicit word.
+- Leave nothing behind: keep a ledger of what you create (definitions, modules, tokens, rows) and, once the person agrees, remove it, or hand them the list. Delete only your own test rows, never the person's. Put locks and templates back exactly as found.
+- A refusal is the system working. Report what you saw and wait; choosing a role, an operator setting or a reset is the human's decision.
+- Conversation, Insights and the Assistant send rows to a model provider and cost money: say so first.
+
+## Choose the route
+
+- **Explain or guide** when the person only wants to understand or to do it themselves: use the pages and recipes below.
+- **Act through the Core's MCP door or REST** only when the person has set a token up for you, in their own MCP client or in a headers file only they can read (`chmod 600`, `curl -H @headers.txt`). The token never goes through the chat, a command line or a report; you never mint one. The door is `POST <core>/minimal/mcp/rpc/v1` (JSON-RPC `tools/list`, `tools/call`) with headers `LB-Access-Token`, `X-Session-Id` (a Pitstop install's `mcp-token` helper prints one), `Content-Type: application/json` and `Accept: application/json, text/event-stream`. Through a gateway, REST with a token goes to `<api>/minimal-token/…`. It works only if the token has the create verb (transport is POST), its owner is an `mcp:` user, MCP is on for that space (the operator's setting) and the table is open to MCP (below). Read each tool's description first.
+- **Drive Studio's screen** when neither route can do the step, or the person wants to watch. Prefer the web build in a browser: the desktop app's code editor takes no typed text from automation. See "Driving the screen".
+- Every call, by any route, meets the same wall in the same place: a refusal names the role it judged. Do not widen access to get around one.
+
+## The model in one screen
+
+- **Organization → project → space.** A **space** is where definitions and modules are written and run; the book uses `dev` (write, first run), `staging` (prove) and `prod` (callers). A **feature** is the unit a project's definitions are filed under. Database connections belong to the project, so rows are the same in every space; treat locks and templates as shared too. The Core makes 26-character IDs; an organization's or project's **abbreviation** is fixed for life and appears in API paths.
+- **Identity.** Every request names who asks with headers `X-Org-Id`, `X-Project-Id`, `X-Space-Id`, `X-User-Id`, `X-User-Roles` (operator routes add `X-Server-Key`). An access token (`LB-Access-Token`) replaces the five, and the Core writes them from the token's own row, last: nothing a token carries can overwrite its owner. A token adds no authority.
+- **Role lists** (set by a provisioner or the creator): on an organization, who may read it, update it and **create projects** (its delete list is "recorded, not checked"); **Create a database** and **Drop a database** are held by nobody until a provisioner sets them (**DDL roles**). On a project, who may read, change, delete it; **Read the schema** and **Change the schema** are held by nobody until a provisioner grants them (**Schema roles**). Until then **Databases**, **Scan**, **Live database** and **Schema Changes** answer 403: that is not a fault. On a Pitstop gateway the lists are preset: the role `schema` (first admin only) changes the shape; creating or dropping a database also needs `database_ddl: true` at install.
+- **The access chain, in this order, for every table:** visibility → locks → template → row scope.
+  - A **lock** is absolute: it closes a verb for a channel (table-wide, MCP, M2M) whatever the role, `admin` included. A freshly indexed table ("fresh from indexing — serving reads only") has GET open to any role, create/update/delete locked, MCP and M2M shut.
+  - A **permission template** is a matrix of roles per verb and channel (**Auto API (REST)**, **MCP**, **Machine to machine**); an empty cell is closed. No template means open to any role, locks permitting. A template protects nothing until assigned; deleting an assignment or a template reverts the table to OPEN. A template alone does not open MCP or M2M: the lock must be open too.
+  - **Hidden** (**Visible** off) drops the table from every listing; locks, template and scope stay.
+  - **Row scope**: one text column must equal a header of the caller. Reads return only matching rows; an insert gets the column from the header, whatever the body says. It is a real boundary only when a token supplies the header: a server-key call sets its own headers and can name any user. A scope binds one object: a view over a scoped table has none until it is indexed and scoped itself.
+- **Access tokens**: roles (a subset of the minter's, frozen), a key type (four slots c r u d, `-` withholds: `-r--` is read-only), a token type that picks the channel it is judged on (user, reviewer, anyone → Auto API roles; mcp → MCP roles; m2m, cron, daemon → M2M roles; the agent columns of a template are empty by default), an expiry (frozen). The owner is whoever mints it, and cannot change.
+
+## The pages (sidebar groups)
+
+| Group | Page | For |
+|---|---|---|
+| OVERVIEW | Home | the four steps (Connect, Index, Govern, Serve) and the checklist **SET UP YOUR WORKSPACE** |
+| BUILD | Auto API, Browse | every indexed table as REST, tried from the page; its rows, read-only |
+| | Custom API | definitions: **Editor**, **Form**, **History**, **Try**, **Promote** |
+| | Code Modules, Apps | shared Lua and Starlark source, per space; HTML apps (unverified) |
+| | Conversation | ask for an API in plain words (a model, through the MCP door) |
+| DATA | Schema Explorer | **Indexed tables** and **Live database** |
+| | Databases, Table Indexing, Schema Changes | add, create or drop databases; make tables known; run SQL on a live database |
+| WORKSPACE | Organizations, Projects, Spaces, Features | create and edit each; no deletes for spaces and features |
+| GOVERNANCE | Access Tokens, Permission Templates, Table Governance, Readiness | tokens; templates; locks, template, visibility and scope per table; advice (blocks nothing) |
+| SYSTEM | Provisioning, Activity, MCP, Settings | provisioner's page; every call, newest first ("Needs a role in project_create_roles"; a row shows caller, IDs and request ID, never a body; **My activity**: yours); the MCP door (**Connect**, **Tools**, **Playground**); six settings tabs |
+| (none) | Insights (⌘6), AI Assistant (⌘.) | questions through a persona; a side panel on any page but Insights; both use the MCP door and send data to a model provider |
+
+## Recipes
+
+**Connect.** **Direct to Core** → **I have a server key** → **Server URL** (wait for **Reachable**) → **Identity options**: **User ID** → the person pastes **Server key**; expect "Key accepted…" → **Continue** → **Pick your workspace**: paste the **Organization ID** (empty only on a Core with no organization yet) → **Open Studio**. **Gateway**: address → **Client ID** only if asked (a Pitstop install publishes it at `<api>/app/config/config.json`, key `studio_desktop_client_id`; for a gateway that publishes none, register `http://127.0.0.1:43517/auth/callback`, also ports 43518 and 43519, as a Native application in the identity provider) → **Continue**; the person logs in in their browser. A password-only gateway login locks the WORKSPACE and GOVERNANCE pages, Databases, Table Indexing, Schema Changes and Provisioning ("Admin screens need a second factor") until the person adds an authenticator and signs in again. Sign-out clears the key and the saved MCP token; never sign out without the key at hand.
+
+**Create the workspace** (Direct to Core: a gateway serves one workspace fixed by its sign-in, and a project made there is never served; add databases to its project instead). Ask the person for every value and create only the names they give: spaces and features cannot be deleted on their own. Organization: sign in as `sys:…` → **Organizations** → **+ New Org**: eight required fields (name, abbreviation, admin email, admin name, address, state, country, pin code); leave the role lists empty → **Create** (copy the ID). Project: sign in as an ordinary ID with the org ID → **Projects** → **New Project**: name, abbreviation ("Cannot be changed later."), **Database 1**; wait for "The Core can open this connection." → **Create**. Pick project, space and feature from the lists, never with **Enter IDs manually** (the project then has no name and Databases answers 400). **Spaces** → **New Space** (name, valid contact email, description; you become the owner, permanently); **Features** → **New Feature**; then **Home** → **Pick** → **Apply**. A provisioner sets **Schema roles** and **DDL roles** (a role + Enter, **Save roles**): only the list the task needs, back to "nobody" afterwards. A `sys:` user is refused when editing a project: edit as an ordinary user.
+
+**Read and write rows.** `GET <core>/minimal/api/rest/auto/v1/<org>/<project>/<code>/<database>/<table>`, code `pg` (PostgreSQL, TimescaleDB, Citus, CockroachDB, YugabyteDB, RisingWave), `ms` (MySQL, Percona, Vitess, TiDB, StarRocks, SingleStore), `ma` (MariaDB), `ch` (ClickHouse). Query: `pg` and `ps` (page from 0, size, 100 rows at most by default; both mandatory), `fc` (columns), a filter `<column>=eq.<value>` (`id=eq.3`), `oy` (`id.as` or `id.ds`; set it, there is no default order). A POST body is always an array; give `"id": null` to ask for a generated key, and dates with a zone (`2026-10-31T00:00:00Z`). Success is 201 `{"rows_affected": N}`. The page's orange line "Expect 403: …" is Studio predicting; the Core decides.
+
+**Mint and use a token** (the person does this; you never see the string). For MCP they sign in as an `mcp:…` user first. **Access Tokens** → **Mint token**: Type (**MCP agent**: create and read, what the MCP door needs; **Reviewer**: read-only, for REST), Name, Roles, **Expires in (days)**: the fewest roles, a short expiry; neither can change later. The string shows in clear once: never read, screenshot or repeat it. The person copies it into a password manager, or presses **Use for MCP on this device** (keychain; MCP agent only). Never press the eye icon on the list or **Reveal passwords** on Projects. **Settings → MCP** takes the URL (ending `/minimal/mcp/rpc/v1`; a direct Core serves it on port 3046 by default) and the token; **MCP → Connect**. Delete: "Whatever uses this token stops working at once. This cannot be undone." On the Auto API page the person pastes a token into **Headers ×5** → "access token" (a gateway strips it).
+
+**Govern a table.** **Table Governance** → **Access** on the row. Note the locks and template as found. A table with no template is open to every role as soon as a lock opens (Readiness: "every role passes"), so assign a template first: **Permission Templates** → **New template** (**Start from**, check **EFFECTIVE GRANTS**, **Save**), then tick rows → **Template…** → **Assign**. Then open reads to agents: banner **Open MCP + M2M reads** ("Opened MCP and M2M reads on <table>": both channels, never a write). Open a write: the table-wide switch asks "Open create on Table-wide for <table>?" (**Undo** after). Hide: **Visible** off ("Hid <table>", **Undo**; **Hidden (N)** → **Restore**). Row scope: pick a text column, type `X-User-Id`, **Apply** ("Row scope set on <table>"); **Clear scope**. Verify with a read as each caller; put locks back exactly as found.
+
+**Databases.** **Databases** → **Add database**: **Type**, host, port, username, database name; the person types the password. The connection is tried first and stores nothing; the host must be reachable by the Core. Registering does not reliably index: **Table Indexing** → **Scan** (needs schema read), **Select all new** → **Index tables**, or type table names; new tables start locked. A view must be indexed before it is listed. **Edit connections** replaces the WHOLE set: press **Load current passwords into the rows below** first or the save can replace stored passwords. **Schema Changes**: "This runs SQL on a live database. There is no preview, and Studio cannot undo it."; it refuses a statement holding both `drop` and `database`, even in a string. **Drop a database**: org drop role, then two tokens minted at least 23 minutes apart, then typing the name; it also removes the connection from the project. Never start one without the person's explicit word.
+
+**Promote.** On **Custom API** tick the definition → **Promote** → **Target space**, **Version in the target** → **Promote** ("Copied 1 to the other space"). It copies, never moves, and carries the connection. Each space holds only the versions it was given: `?version=1.1` is 200 in `dev`, 417 "definition not found" where only 1.0 was promoted. Modules do not travel: make them in each space. To check the copy, switch space (sidebar picker, or **Settings** → **Change workspace**), tick the feature again (a change of space clears it) → **Apply**. A Pitstop install has only `dev`: look at **Spaces** first.
+
+**AI pages.** Conversation, Insights and the AI Assistant call a model provider with the person's key (**Settings → AI Assistant**, kept in the keychain) and send table samples ("Higher row counts send more data to the AI provider and consume more tokens."). They need the MCP door and two gates: the table's MCP read open, and the definition's `mcp` block with roles (**Attributes** → **MCP** → **Enabled**). Insights also needs a persona (⌘6 → **+ New persona**) and an enabled `insight` feature (**Open Features**; its contact email must be valid), or it says "sessions run locally only".
+
+## Custom API definitions (where most mistakes happen)
+
+A definition is one YAML document (at most 16384 bytes, the counter beside **Validate**; put shared code in a module): a path, a method, a list of steps. **+** above the list starts a new one; with a definition selected the button reads **Update** and your text replaces THAT definition. In a new one replace only `http` and `logic`: `identifiers` (top bar), `database` (the project's connection) and `config` arrive filled, and so does `permission`, as `power, admin`: set the fewest roles that need the call before **Deploy**, since every role listed may run it. The password shows as the mask `'********'`; the first definition on each database in each space must carry the real one under **DATABASE** → **Password**, typed by the person.
+
+```yaml
+http:
+  uri: leave/headroom        # the path; EMPTY in a new definition, Validate fails until it is set
+  method: get                # get | post | put | delete
+  version: "1.0"
+  input_type: json
+logic:                       # steps, in order
+  - sql: |                   # exactly one statement
+      SELECT COALESCE(SUM(days), 0) AS used
+      FROM leave_request WHERE employee_id = ?:id AND status = 'approved'
+    omit: true               # keep for later steps, leave out of the answer
+  - lua: headroom            # a script step: its name, then the source
+    code: |
+      function min_main()
+        return { remaining = 25 - step_0[1].used }
+      end
+    omit: false
+```
+
+- **Steps.** Kinds `sql`, `lua`, `lark` (Starlark), `expr`. `let`, `case`, `fnc` are in the grammar and not implemented: never use them. Each result is `step_0`, `step_1`, … for later steps. The answer holds every step not marked `omit`: an object keyed `step_N`, or that one result alone.
+- **A definition is a grant.** Its **access**, `mcp` and `m2m` role lists decide who may run it, and its SQL runs as the database login: any statement is accepted (DDL, TRUNCATE), and table locks, templates and row scope, which are Auto API gates, are not consulted (Book of Minimal; not run here). Write read-only SQL unless asked; ASK before deploying one that writes or opens to agents.
+- **Placeholders.** `?:name` takes the caller's query or body value, or a field an earlier SCRIPT step returned (the script's field wins). Write it bare: the Core quotes strings itself, and `'?:id'` is refused at the call. It is plain text substitution: only where a value goes, never inside `$$…$$`, a quoted identifier or a comment, never as a table or column name. A name never sent is refused by name (424 `definition defines fields: ['x'], but missing from the Request`); an empty value reaches the database as `''`.
+- **Writes.** A call that is not a GET runs its steps in one transaction (run on Postgres; per the Core every engine but ClickHouse, and MySQL and MariaDB commit at DDL and TRUNCATE): a failed step rolls back what earlier steps wrote; id sequences do not roll back. A GET, and any call on ClickHouse, has no rollback: every write stands. An INSERT answers `{"rows_affected": N}`, or the rows if it ends in `RETURNING`. A successful POST answers 201.
+- **Script steps** define `min_main()` (no parameters) and return a map (a table in Lua, a dict in Starlark); `{}` is valid. They read earlier steps as `step_N` and the caller's values as `input` (text).
+
+| | Lua | Starlark |
+|---|---|---|
+| first row of a step | `step_0[1]` (from 1) | `step_0[0]` (from 0) |
+| a field; length | `row.status`; `#step_0` | `row["status"]`; `len(step_0)` |
+| caller's value | `input.id` | `input["id"]` |
+| SQL NULL | NOT `nil` (a userdata): test the type you expect, as `type(v) == "string"` for text | `None` |
+| SQL integer | a number | a float: `int(x)` before `str(x)` |
+| not available | — | `sum`, `round`; a step that only sets `result =` |
+
+- **Expr** is one expression, written `- expr: name` then `code: |` and the expression on the lines below (the key is the step's name), for example `{"id": input.id, "has_pending": step_0[0].pending > 0}`. It reads comparisons, arithmetic, `? :`, map literals, `len()`, `input.field` and `step_N[0].field` (from 0). It must give a map: a text or a number answers `{}` with no error. A syntax error passes Deploy and fails at the call.
+- **Modules** (**Code Modules**, tabs **Lua** and **Starlark**): separate stores, per space. A Lua module is a file that returns a table of functions (`local M = {} … return M`); a Starlark module is plain top-level `def`s, with no `min_main`. Load by the BARE name: Lua `require("name")`, Starlark `load("name", "symbol")` (`load("name.star", …)` fails on this Core). A module is compiled when created or saved: a bad source is refused with its line and column. A change reaches every caller on its next call, a broken one too. **Delete** is not checked against callers, which then fail at the `require` or `load` line. **History** lists every create, update and delete.
+- **Versions.** A call carries `?version=`; an update keeps the older version callable; an unknown version is 417. **Attributes** edits **Documentation**, tags, groups and the **MCP** and **Machine-to-machine** blocks only. **Update** (not **Deploy**) saves a deployed definition.
+- **Over MCP or REST**, `get` shows the password as `'********'`, and sending it back silently replaces the stored one. Edit from `export` (real password: keep it out of chat and reports) and send the whole document: a full replace clears any `metadata`, `mcp` or `m2m` you leave out. Never ask for the password in the chat.
+
+| Mistake | Validate | Deploy / Update | The call |
+|---|---|---|---|
+| empty `uri` | refuses | | |
+| two statements in one SQL step | passes | 400 | |
+| Lua or Starlark source that does not compile | passes | 400 "ERROR COMPILING DEFINITION YAML" | |
+| `let`, `case`, `fnc` | passes (a yellow line: "refused when the definition runs") | 400 for the one `let` block tried; `case` and `fnc` not run | |
+| `'?:id'`; an Expr that does not parse; a script that returns text or has no `min_main`; a missing row, name or index | passes | takes it | 424 "could not execute URI", with `details` (the step as `name.lua:3:` or `name.star:2:`, then the script's or the database's own words) |
+
+**Before Deploy, check by eye:** one statement per `sql`; no quotes around `?:x`; `min_main` present and returning a map; NULL and missing rows guarded; no `sum`, `round` or `result =` in Starlark (the **Add Step** template is `result = {…}`: replace it); module names bare; `uri` set; `RETURNING` where a later step reads the written row. **Then test:** Validate proves only shape, so call the endpoint (**Try**) and compare with a read on the database. A space is not a database: `dev`, `staging` and `prod` share the project's connection unless the `database` block says otherwise, so trying a POST, PUT or DELETE definition changes real rows. Say which database it is, touch only rows you made, and list them for removal.
+
+## Refusals: text → cause → what to do
+
+| You see | Cause | Do |
+|---|---|---|
+| "Cannot reach the Core. Check the URL." / "Can't reach <address>" | nothing answers; a stopped Core also looks like empty data ("No indexed tables") | fix the address, start the Core, **Retry**; do not index anything |
+| **+ New Org** greyed, "Needs a user id that starts with sys:"; or "A sys: user is refused on this route" | not a provisioner; or a provisioner editing | the person signs in as `sys:…` to create, as an ordinary user to edit |
+| 403 "insufficient permissions for this operation on this table, got [role]" | a lock or template closes the verb | **Open Table Governance**; a lock beats `admin`; ask before opening |
+| "THE SERVER REFUSED THIS (HTTP 403)" on Databases, Scan, Live database, Schema Changes | no schema or database role | a provisioner grants **Schema roles** or **DDL roles** |
+| 403 "this access token's owner is not an MCP identity" | token minted by a non-`mcp:` user | the person signs in as `mcp:…` and mints again (the owner cannot change); you do not mint one |
+| 403 "MCP is not enabled for this space" | the operator has not switched it on | the operator does it; Studio cannot |
+| 401 "access token does not resolve to an active, unexpired grant" | wrong MCP URL, or a dead token | check the URL first |
+| 417 "definition not found" | no definition with that path, method and version in this space (a wrong path or method, or a deleted definition, answers the same) | check all four; use a held version, or promote it (ask first) |
+| 403 "insufficient permissions: required [x], got [y]" on a Custom API call; or "…for mcp access, got [y]" | the caller's role is not in the definition's **access** list; for MCP, its `mcp` block is off or lacks the role | the person changes **access**, or enables **Attributes** → **MCP**; ask first |
+| Deploy 409 "definition already exists" | that method and path exist in this space, at any version | open it and use **Update**, or pick another path |
+| Deploy: "The password is hidden and no other definition in this space uses the same database…" | first definition on that database in this space | the person types the password in **DATABASE** |
+| 424 "script step defines no min_main function" / "min_main must return a map" / "attempt to index a non-table object(nil)" / "undefined: sum" | the script contract; a missing row not guarded; a name not available | define `min_main`, return a map; guard `nil`; count in a loop |
+| 424 "lua module code not found" / "lark module code not found" | module missing in this space, deleted, or loaded as `name.star` | ask, then create it in this space; bare name |
+
+## Driving the screen (when you must)
+
+- Password and key fields can block keyboard automation: the person types or pastes them.
+- **Update** stays grey until the text has passed **Validate**: click it first. A deployed definition's **Editor** shows the Core's copy (keys sorted, four-space list indents): replace the whole `logic` block, as the book always did. Set editor text through the editor's own model (page script, web build); typing is unreliable. Never read or print browser storage or cookies: a development web build keeps a copy of the server key in local storage (a release build keeps it for the tab only); at the end the person signs out and clears the site's data. The **Form** step cards are small fixed boxes: read long scripts in **Editor**.
+- Tabs are **Editor**, **Form**, **History**, **Try**. **Try** lists every `?:name` as a required row, script-filled names included (leave those empty). A GET takes its values from the rows; for a POST put them in the JSON **Body** (`{}` at least) and leave the rows empty.
+- On **Code Modules**, a "Discard unsaved changes?" dialog (leaving an edit by **Reload** or another module) swallows the next clicks: answer it first. After a space change with a module selected, reopen the page: the old text can linger.
+- Pop-ups and selects (**Headers ×5**, **Add Step**) may not open from background automation on the desktop app; use the web build.
+- After a database change in the top-bar chip, Browse shows the old rows until a table is picked again.
+
+## Not verified — ask the person, do not assume
+
+developer-token sign-in; a `put` or `delete` definition; update or delete on a scoped table; a `let`, `case` or `fnc` block the Core accepts; a promoted definition called without its modules; a deleted module's history; **Apps**; saving an insight as an app; re-locking after **Open MCP + M2M reads**; **Index tables** and **Index all tables** on a fresh project (0 may mean already indexed: **Scan** each database); successful PUT and DELETE on the Auto API page.
+
+## Done report — the shape to hand back
+
+1. What you did, in which space, as which identity, by which route.
+2. Each check with its actual output (status, row count, message).
+3. What you created and removed; what is left, and why; what the person still owns (secrets, operator settings, roles, anything you stopped at).

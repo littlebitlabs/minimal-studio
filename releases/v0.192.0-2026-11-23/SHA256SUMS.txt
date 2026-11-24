@@ -1,0 +1,8 @@
+eca05a0f61c9d47ad1bcfa43ea5e086b7860aa25e205ac5ee17aeb8cdfc8e59b  minimal-studio-go.cdx.json
+5f13d5b427a62b4171f964a665630603c06876c4e2cd7be44bf7693657ae3cc9  minimal-studio-npm.cdx.json
+706691deda99b904fae13e8f6bbb0587465e27757a7712f267d63c9cd2258ab4  minimal-studio-v0.192.0-2026-11-23-linux-amd64.tar.gz
+f36d00b57fbfe6e306cca213142b1dad5b65cb7ced296cadf3d5d702ddf075f7  minimal-studio-v0.192.0-2026-11-23-linux-arm64.tar.gz
+4f0f6e16521cc85e1deba8e3d286c562524c9cff5d3fb839e34dbf6e67413a69  minimal-studio-v0.192.0-2026-11-23-mac-amd64.zip
+9dc1605aaad234485f766e92e3edef4f46720b363be960733d335b5e3c13d1f2  minimal-studio-v0.192.0-2026-11-23-mac-arm64.zip
+9244b70ae4ef120e067ff8f260be38271749215a42f5672c8749188ef889d4be  minimal-studio-v0.192.0-2026-11-23-web.zip
+1e1f380d283f72d4d063ff4c7602ab139f625eaba2726fe972a7108dcb4effca  minimal-studio-v0.192.0-2026-11-23-windows-amd64.zip
